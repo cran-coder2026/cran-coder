@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cran Coder | طلب خدمة</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-page: #0b0f17;
+            --bg-surface: #121824;
+            --bg-elevated: #182030;
+            --accent: #38bdf8;
+            --accent-soft: rgba(56, 189, 248, 0.12);
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --line: #232e42;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* هيدر هادئ وبسيط */
+        .topbar {
+            border-bottom: 1px solid var(--line);
+            background-color: var(--bg-page);
+            padding: 1.15rem 1.5rem;
+        }
+
+        .topbar-inner {
+            max-width: 740px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .brand img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid var(--line);
+        }
+
+        .brand-name {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
+        .brand-tag {
+            font-size: 0.78rem;
+            color: var(--text-sub);
+            display: block;
+            margin-top: -2px;
+        }
+
+        .step-indicator {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+
+        /* شريط تقدم رفيع وهادئ */
+        .progress-track {
+            width: 100%;
+            height: 3px;
+            background-color: var(--line);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 25%;
+            background-color: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        /* المحتوى الرئيسي */
+        .main-wrap {
+            flex: 1;
+            max-width: 740px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.25rem 3.5rem;
+        }
+
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 2rem;
+        }
+
+        .stage {
+            display: none;
+        }
+
+        .stage.active {
+            display: block;
+            animation: calmFade 0.25s ease;
+        }
+
+        @keyframes calmFade {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stage-head {
+            margin-bottom: 1.5rem;
+        }
+
+        .stage-head h1 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            margin-bottom: 0.35rem;
+        }
+
+        .stage-head p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+        }
+
+        /* اختيارات البطاقات */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.9rem;
+        }
+
+        .grid-auto {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .pick-card {
+            background-color: var(--bg-elevated);
+            border: 1.5px solid var(--line);
+            border-radius: 14px;
+            padding: 1.25rem;
+            text-align: right;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .pick-card:hover {
+            border-color: #364663;
+        }
+
+        .pick-card.selected {
+            border-color: var(--accent);
+            background-color: var(--accent-soft);
+        }
+
+        .pick-card i {
+            font-size: 1.25rem;
+            color: var(--accent);
+            margin-bottom: 0.6rem;
+            display: block;
+        }
+
+        .pick-card strong {
+            display: block;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .pick-card span {
+            font-size: 0.84rem;
+            color: var(--text-sub);
+        }
+
+        .pill-btn {
+            background-color: var(--bg-elevated);
+            border: 1.5px solid var(--line);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            text-align: right;
+            cursor: pointer;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .pill-btn i {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+        }
+
+        .pill-btn:hover {
+            border-color: #364663;
+        }
+
+        .pill-btn.selected {
+            border-color: var(--accent);
+            background-color: var(--accent-soft);
+            color: #fff;
+        }
+
+        .pill-btn.selected i {
+            color: var(--accent);
+        }
+
+        /* الحقول */
+        .sub-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--line);
+            display: none;
+        }
+
+        .sub-section.show {
+            display: block;
+        }
+
+        .section-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .fields-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            font-size: 0.84rem;
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+
+        .field input,
+        .field textarea {
+            background-color: var(--bg-elevated);
+            border: 1.5px solid var(--line);
+            border-radius: 11px;
+            padding: 0.75rem 0.9rem;
+            color: var(--text-main);
+            font-size: 0.92rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .field input:focus,
+        .field textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .field textarea {
+            min-height: 95px;
+            resize: vertical;
+        }
+
+        /* الإضافات */
+        .chips-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+
+        .chip {
+            background-color: var(--bg-elevated);
+            border: 1.5px solid var(--line);
+            color: var(--text-sub);
+            padding: 0.5rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chip:hover {
+            border-color: #364663;
+            color: var(--text-main);
+        }
+
+        .chip.selected {
+            border-color: var(--accent);
+            background-color: var(--accent-soft);
+            color: var(--text-main);
+        }
+
+        /* شريط الميزانية */
+        .budget-panel {
+            background-color: var(--bg-elevated);
+            border: 1.5px solid var(--line);
+            border-radius: 14px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .budget-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.9rem;
+        }
+
+        .budget-num {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #28354b;
+            border-radius: 999px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        .budget-ends {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-top: 0.55rem;
+        }
+
+        /* الرسالة النهائية */
+        .summary-box {
+            background-color: var(--bg-elevated);
+            border: 1.5px solid var(--line);
+            border-radius: 14px;
+            padding: 1.15rem;
+            white-space: pre-line;
+            font-size: 0.92rem;
+            color: var(--text-main);
+            margin-bottom: 1.25rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* أزرار التنقل */
+        .nav-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1.75rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--line);
+        }
+
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem 1.35rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: opacity 0.2s ease, background-color 0.2s ease;
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            border: 1.5px solid var(--line);
+            color: var(--text-sub);
+        }
+
+        .btn-ghost:hover {
+            color: var(--text-main);
+            border-color: #364663;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: #07111b;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.92;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .hint-error {
+            color: #f87171;
+            font-size: 0.84rem;
+            margin-top: 0.65rem;
+            display: none;
+        }
+
+        .hint-error.show {
+            display: block;
+        }
+
+        .copied-note {
+            text-align: center;
+            font-size: 0.88rem;
+            color: var(--accent);
+            font-weight: 700;
+            margin-top: 0.75rem;
+            min-height: 1.3rem;
+        }
+
+        footer {
+            border-top: 1px solid var(--line);
+            padding: 1.25rem;
+            text-align: center;
+            font-size: 0.84rem;
+            color: var(--text-sub);
+        }
+
+        footer a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .card { padding: 1.35rem; }
+            .grid-2, .fields-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="#" class="brand" onclick="goStep(1); return false;">
+                <img src="crnlogo.jpg" alt="Cran Coder">
+                <div>
+                    <span class="brand-name">Cran Coder</span>
+                    <span class="brand-tag">تطوير مواقع وبوتات تليجرام</span>
+                </div>
+            </a>
+            <div class="step-indicator" id="step-label">الخطوة 1 من 4</div>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progress-bar"></div>
+        </div>
+    </header>
+
+    <main class="main-wrap">
+        <div class="card">
+
+            <!-- الخطوة 1: نوع الخدمة -->
+            <div class="stage active" id="stage-1">
+                <div class="stage-head">
+                    <h1>عايز نبدأ بإيه؟</h1>
+                    <p>اختار نوع الخدمة عشان تظهر لك الأسئلة المناسبة ليك بس بدون زحمة.</p>
+                </div>
+
+                <div class="grid-2">
+                    <button type="button" class="pick-card" id="pick-website" onclick="setService('website')">
+                        <i class="fa-solid fa-globe"></i>
+                        <strong>موقع إلكتروني</strong>
+                        <span>موقع لشخص أو هدية أو مشروع أو بورتفوليو</span>
+                    </button>
+
+                    <button type="button" class="pick-card" id="pick-bot" onclick="setService('bot')">
+                        <i class="fa-brands fa-telegram"></i>
+                        <strong>بوت تليجرام</strong>
+                        <span>بوت إدارة، رد تلقائي، طلبات، أو أدوات مخصصة</span>
+                    </button>
+                </div>
+
+                <div class="hint-error" id="err-1">من فضلك اختار نوع الخدمة أولاً قبل المتابعة.</div>
+
+                <div class="nav-actions">
+                    <span></span>
+                    <button type="button" class="btn btn-primary" onclick="nextFromStep1()">
+                        <span>التالي</span>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- الخطوة 2: تفاصيل الخدمة -->
+            <div class="stage" id="stage-2">
+                <div class="stage-head">
+                    <h1 id="step2-title">تفاصيل الطلب</h1>
+                    <p id="step2-desc">جاوب على النقط اللي تهم فكرتك عشان الصورة تكون واضحة.</p>
+                </div>
+
+                <!-- مسار الموقع -->
+                <div id="flow-website" style="display: none;">
+                    <span class="section-label">الموقع ده لمين أو لإيه؟</span>
+                    <div class="grid-auto" id="web-audience-list">
+                        <button type="button" class="pill-btn" onclick="setWebAudience('شخص معين / هدية أو مناسبة', 'gift', this)">
+                            <i class="fa-solid fa-gift"></i>
+                            <span>شخص معين / هدية أو مناسبة</span>
+                        </button>
+                        <button type="button" class="pill-btn" onclick="setWebAudience('مشروع أو براند أو متجر', 'project', this)">
+                            <i class="fa-solid fa-briefcase"></i>
+                            <span>مشروع أو براند</span>
+                        </button>
+                        <button type="button" class="pill-btn" onclick="setWebAudience('بورتفوليو أو صفحة شخصية', 'personal', this)">
+                            <i class="fa-solid fa-user"></i>
+                            <span>موقع شخصي / بورتفوليو</span>
+                        </button>
+                        <button type="button" class="pill-btn" onclick="setWebAudience('صفحة تعريفية أو عرض سريع', 'landing', this)">
+                            <i class="fa-solid fa-file-lines"></i>
+                            <span>صفحة تعريفية</span>
+                        </button>
+                    </div>
+
+                    <!-- أسئلة لو اختار شخص معين / هدية -->
+                    <div class="sub-section" id="sub-gift">
+                        <span class="section-label">تفاصيل الشخص والمناسبة</span>
+                        <div class="fields-grid">
+                            <div class="field">
+                                <label>اسم الشخص أو لقبه</label>
+                                <input type="text" id="gift-name" placeholder="مثال: أحمد، مريم، صديقي">
+                            </div>
+                            <div class="field">
+                                <label>المناسبة</label>
+                                <input type="text" id="gift-occasion" placeholder="مثال: عيد ميلاد، تخرج، ذكرى، تقدير">
+                            </div>
+                            <div class="field full">
+                                <label>حاجات بيحبها أو تفاصيل تميزه</label>
+                                <input type="text" id="gift-likes" placeholder="مثال: ألعاب، ألوان معينة، صور ذكريات، موسيقى، رسالة خاصة">
+                            </div>
+                            <div class="field full">
+                                <label>فكرة أو شكل في بالك (اختياري)</label>
+                                <input type="text" id="gift-idea" placeholder="مثال: أقسام بسيطة، عد تنازلي، ألبوم صور، كلام مؤثر">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- أسئلة لو اختار مشروع أو شخصي أو صفحة تعريفية -->
+                    <div class="sub-section" id="sub-general-web">
+                        <span class="section-label">تفاصيل الموقع</span>
+                        <div class="fields-grid">
+                            <div class="field">
+                                <label>اسم المشروع أو الشخص</label>
+                                <input type="text" id="web-title" placeholder="مثال: اسم البراند أو اسمك">
+                            </div>
+                            <div class="field">
+                                <label>الهدف الأساسي من الموقع</label>
+                                <input type="text" id="web-goal" placeholder="مثال: تعريف بالخدمة، تواصل، عرض أعمال">
+                            </div>
+                            <div class="field full">
+                                <label>الأقسام أو المعلومات اللي لازم تكون موجودة</label>
+                                <input type="text" id="web-sections" placeholder="مثال: نبذة، الخدمات، الأسعار، روابط السوشيال ميديا">
+                            </div>
+                            <div class="field full">
+                                <label>رابط أو موقع عاجبك أسلوبه (اختياري)</label>
+                                <input type="text" id="web-ref" placeholder="ضع رابط أو اكتب وصف للستايل اللي يعجبك">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- مسار بوت تليجرام -->
+                <div id="flow-bot" style="display: none;">
+                    <span class="section-label">إيه الاستخدام الرئيسي للبوت؟</span>
+                    <div class="grid-auto" id="bot-purpose-list">
+                        <button type="button" class="pill-btn" onclick="setBotPurpose('إدارة جروب أو قناة', this)">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>إدارة جروب أو قناة</span>
+                        </button>
+                        <button type="button" class="pill-btn" onclick="setBotPurpose('رد تلقائي وتواصل مع العملاء', this)">
+                            <i class="fa-solid fa-reply-all"></i>
+                            <span>رد تلقائي وتواصل</span>
+                        </button>
+                        <button type="button" class="pill-btn" onclick="setBotPurpose('استقبال طلبات أو حجز', this)">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                            <span>طلبات وحجوزات</span>
+                        </button>
+                        <button type="button" class="pill-btn" onclick="setBotPurpose('أدوات أو خدمات مخصصة', this)">
+                            <i class="fa-solid fa-sliders"></i>
+                            <span>أدوات وخدمات مخصصة</span>
+                        </button>
+                    </div>
+
+                    <div class="sub-section show" id="sub-bot">
+                        <span class="section-label">تفاصيل البوت</span>
+                        <div class="fields-grid">
+                            <div class="field">
+                                <label>اسم البوت أو فكرته</label>
+                                <input type="text" id="bot-name" placeholder="مثال: بوت متابعة، بوت استفسارات">
+                            </div>
+                            <div class="field">
+                                <label>المستخدمين الأساسيين للبوت</label>
+                                <input type="text" id="bot-users" placeholder="مثال: عملاء، أعضاء جروب، فريق عمل">
+                            </div>
+                            <div class="field full">
+                                <label>الأوامر أو الخطوات اللي المفروض البوت يعملها</label>
+                                <input type="text" id="bot-steps" placeholder="مثال: رسالة ترحيب، أزرار اختيارات، إرسال بيانات أو ملفات">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hint-error" id="err-2">اختار الفئة الأساسية أولاً عشان نكمل.</div>
+
+                <div class="nav-actions">
+                    <button type="button" class="btn btn-ghost" onclick="goStep(1)">
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span>السابق</span>
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="nextFromStep2()">
+                        <span>التالي</span>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- الخطوة 3: الميزانية والإضافات -->
+            <div class="stage" id="stage-3">
+                <div class="stage-head">
+                    <h1>الميزانية والإضافات</h1>
+                    <p>حدد الميزانية المناسبة ليك (من 300 إلى 2000 جنيه) واختر الإضافات اللي تفضلها.</p>
+                </div>
+
+                <div class="budget-panel">
+                    <div class="budget-row">
+                        <span style="color: var(--text-sub); font-size: 0.9rem;">الميزانية المحددة</span>
+                        <span class="budget-num" id="budget-text">300 جنيه</span>
+                    </div>
+                    <input type="range" id="budget-range" min="300" max="2000" step="50" value="300" oninput="updateBudgetVal(this.value)">
+                    <div class="budget-ends">
+                        <span>300 جنيه</span>
+                        <span>1,150 جنيه</span>
+                        <span>2,000 جنيه</span>
+                    </div>
+                </div>
+
+                <span class="section-label">إضافات تفضلها (اختياري)</span>
+                <div class="chips-wrap">
+                    <button type="button" class="chip" onclick="toggleChip('ألوان هادئة ومنظمة', this)">ألوان هادئة ومنظمة</button>
+                    <button type="button" class="chip" onclick="toggleChip('توافق ممتاز مع الموبايل', this)">توافق ممتاز مع الموبايل</button>
+                    <button type="button" class="chip" onclick="toggleChip('حركة بسيطة ونظيفة', this)">حركة بسيطة ونظيفة</button>
+                    <button type="button" class="chip" onclick="toggleChip('أولوية في التنفيذ', this)">أولوية في التنفيذ</button>
+                </div>
+
+                <div class="nav-actions">
+                    <button type="button" class="btn btn-ghost" onclick="goStep(2)">
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span>السابق</span>
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="goStep(4)">
+                        <span>التالي</span>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- الخطوة 4: ملاحظات وإرسال -->
+            <div class="stage" id="stage-4">
+                <div class="stage-head">
+                    <h1>ملاحظات وإرسال الطلب</h1>
+                    <p>اكتب أي ملاحظة أو تعليق حابب يوصلي، وبعدها انسخ الرسالة وابعتها على TikTok.</p>
+                </div>
+
+                <div class="field" style="margin-bottom: 1.5rem;">
+                    <label>ملاحظات أو كومنت ليك (اختياري)</label>
+                    <textarea id="final-notes" placeholder="اكتب أي تفصيلة زيادة، موعد يهمك، أو سؤال حابب تسأله..." oninput="renderSummary()"></textarea>
+                </div>
+
+                <span class="section-label">ملخص الرسالة الجاهزة للنسخ</span>
+                <div class="summary-box" id="summary-box"></div>
+
+                <button type="button" class="btn btn-primary btn-full" onclick="copyAndOpenTikTok()">
+                    <i class="fa-regular fa-copy"></i>
+                    <span>نسخ الرسالة وفتح صفحة TikTok</span>
+                </button>
+                <div class="copied-note" id="copied-note"></div>
+
+                <div class="nav-actions">
+                    <button type="button" class="btn btn-ghost" onclick="goStep(3)">
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span>السابق</span>
+                    </button>
+                    <button type="button" class="btn btn-ghost" onclick="resetForm()">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>بدء طلب جديد</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <span>Cran Coder — </span>
+        <a href="https://www.tiktok.com/@crancoder?_r=1&_t=ZS-9BZ7L94nf52" target="_blank">@crancoder</a>
+    </footer>
+
+    <script>
+        const TIKTOK_LINK = "https://www.tiktok.com/@crancoder?_r=1&_t=ZS-9BZ7L94nf52";
+
+        const state = {
+            step: 1,
+            service: "",
+            webAudience: "",
+            webMode: "",
+            botPurpose: "",
+            budget: 300,
+            addons: []
+        };
+
+        function goStep(stepNum) {
+            state.step = stepNum;
+            document.querySelectorAll(".stage").forEach(el => el.classList.remove("active"));
+            document.getElementById(`stage-${stepNum}`).classList.add("active");
+
+            document.getElementById("step-label").textContent = `الخطوة ${stepNum} من 4`;
+            document.getElementById("progress-bar").style.width = `${stepNum * 25}%`;
+
+            if (stepNum === 2) {
+                document.getElementById("flow-website").style.display = state.service === "website" ? "block" : "none";
+                document.getElementById("flow-bot").style.display = state.service === "bot" ? "block" : "none";
+                document.getElementById("step2-title").textContent =
+                    state.service === "website" ? "تفاصيل الموقع الإلكتروني" : "تفاصيل بوت تليجرام";
+            }
+
+            if (stepNum === 4) {
+                renderSummary();
+            }
+
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function setService(service) {
+            state.service = service;
+            state.webAudience = "";
+            state.webMode = "";
+            state.botPurpose = "";
+
+            document.getElementById("pick-website").classList.toggle("selected", service === "website");
+            document.getElementById("pick-bot").classList.toggle("selected", service === "bot");
+            document.getElementById("err-1").classList.remove("show");
+        }
+
+        function nextFromStep1() {
+            if (!state.service) {
+                document.getElementById("err-1").classList.add("show");
+                return;
+            }
+            goStep(2);
+        }
+
+        function setWebAudience(label, mode, btn) {
+            state.webAudience = label;
+            state.webMode = mode;
+
+            document.querySelectorAll("#web-audience-list .pill-btn").forEach(b => b.classList.remove("selected"));
+            btn.classList.add("selected");
+            document.getElementById("err-2").classList.remove("show");
+
+            document.getElementById("sub-gift").classList.toggle("show", mode === "gift");
+            document.getElementById("sub-general-web").classList.toggle("show", mode !== "gift");
+        }
+
+        function setBotPurpose(label, btn) {
+            state.botPurpose = label;
+            document.querySelectorAll("#bot-purpose-list .pill-btn").forEach(b => b.classList.remove("selected"));
+            btn.classList.add("selected");
+            document.getElementById("err-2").classList.remove("show");
+        }
+
+        function nextFromStep2() {
+            if (state.service === "website" && !state.webAudience) {
+                document.getElementById("err-2").classList.add("show");
+                return;
+            }
+            if (state.service === "bot" && !state.botPurpose) {
+                document.getElementById("err-2").classList.add("show");
+                return;
+            }
+            goStep(3);
+        }
+
+        function updateBudgetVal(val) {
+            state.budget = Number(val);
+            document.getElementById("budget-text").textContent = `${state.budget} جنيه`;
+        }
+
+        function toggleChip(name, el) {
+            const index = state.addons.indexOf(name);
+            if (index > -1) {
+                state.addons.splice(index, 1);
+                el.classList.remove("selected");
+            } else {
+                state.addons.push(name);
+                el.classList.add("selected");
+            }
+        }
+
+        function getVal(id) {
+            const node = document.getElementById(id);
+            return node ? node.value.trim() : "";
+        }
+
+        function buildSummaryMessage() {
+            const lines = [
+                "مرحباً Cran Coder،",
+                "دي تفاصيل الطلب اللي جهزته من موقعك:",
+                ""
+            ];
+
+            if (state.service === "website") {
+                lines.push("الخدمة: موقع إلكتروني");
+                lines.push(`الغرض: ${state.webAudience || "لم يُحدد"}`);
+
+                if (state.webMode === "gift") {
+                    if (getVal("gift-name")) lines.push(`اسم الشخص: ${getVal("gift-name")}`);
+                    if (getVal("gift-occasion")) lines.push(`المناسبة: ${getVal("gift-occasion")}`);
+                    if (getVal("gift-likes")) lines.push(`اهتمامات وتفاصيل يحبها: ${getVal("gift-likes")}`);
+                    if (getVal("gift-idea")) lines.push(`فكرة أو شكل مقترح: ${getVal("gift-idea")}`);
+                } else {
+                    if (getVal("web-title")) lines.push(`الاسم / المشروع: ${getVal("web-title")}`);
+                    if (getVal("web-goal")) lines.push(`الهدف الأساسي: ${getVal("web-goal")}`);
+                    if (getVal("web-sections")) lines.push(`الأقسام المطلوبة: ${getVal("web-sections")}`);
+                    if (getVal("web-ref")) lines.push(`مثال أو مرجع: ${getVal("web-ref")}`);
+                }
+            } else if (state.service === "bot") {
+                lines.push("الخدمة: بوت تليجرام");
+                lines.push(`الاستخدام الرئيسي: ${state.botPurpose || "لم يُحدد"}`);
+                if (getVal("bot-name")) lines.push(`اسم / فكرة البوت: ${getVal("bot-name")}`);
+                if (getVal("bot-users")) lines.push(`الفئة المستهدفة: ${getVal("bot-users")}`);
+                if (getVal("bot-steps")) lines.push(`المهام والأوامر المطلوبة: ${getVal("bot-steps")}`);
+            } else {
+                lines.push("الخدمة: لم تُحدد بعد");
+            }
+
+            if (state.addons.length > 0) {
+                lines.push(`الإضافات المفضلة: ${state.addons.join("، ")}`);
+            }
+
+            lines.push(`الميزانية: ${state.budget} جنيه`);
+
+            const notes = getVal("final-notes");
+            if (notes) {
+                lines.push("");
+                lines.push(`ملاحظات: ${notes}`);
+            }
+
+            return lines.join("\n");
+        }
+
+        function renderSummary() {
+            document.getElementById("summary-box").textContent = buildSummaryMessage();
+        }
+
+        function copyAndOpenTikTok() {
+            const text = buildSummaryMessage();
+            const statusEl = document.getElementById("copied-note");
+
+            const done = () => {
+                statusEl.textContent = "تم نسخ الرسالة بنجاح — جاري فتح TikTok...";
+                setTimeout(() => {
+                    window.open(TIKTOK_LINK, "_blank");
+                }, 800);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done).catch(() => {
+                    fallbackCopyText(text);
+                    done();
+                });
+            } else {
+                fallbackCopyText(text);
+                done();
+            }
+        }
+
+        function fallbackCopyText(text) {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+        }
+
+        function resetForm() {
+            state.service = "";
+            state.webAudience = "";
+            state.webMode = "";
+            state.botPurpose = "";
+            state.budget = 300;
+            state.addons = [];
+
+            document.querySelectorAll(".pick-card, .pill-btn, .chip").forEach(el => el.classList.remove("selected"));
+            document.querySelectorAll(".sub-section").forEach(el => el.classList.remove("show"));
+            document.querySelectorAll("input[type='text'], textarea").forEach(el => el.value = "");
+            document.getElementById("budget-range").value = 300;
+            document.getElementById("budget-text").textContent = "300 جنيه";
+            document.getElementById("copied-note").textContent = "";
+
+            goStep(1);
+        }
+    </script>
+</body>
+</html>
